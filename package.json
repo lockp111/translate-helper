@@ -4,8 +4,12 @@
   "description": "智能翻译助手 - 基于大模型的划词翻译和变量命名建议",
   "version": "1.0.0",
   "publisher": "lockp111",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lockp111/translate-helper.git"
+  },
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.108.0"
   },
   "categories": [
     "Other"
