@@ -1,0 +1,119 @@
+{
+  "name": "translate-helper",
+  "displayName": "Translate Helper",
+  "description": "智能翻译助手 - 基于 Azure OpenAI 大模型的划词翻译和变量命名建议",
+  "version": "1.0.0",
+  "publisher": "lockp111",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "translateHelper.translate",
+        "title": "翻译选中文本",
+        "category": "翻译助手",
+        "icon": "$(globe)"
+      },
+      {
+        "command": "translateHelper.naming",
+        "title": "变量命名建议",
+        "category": "翻译助手",
+        "icon": "$(lightbulb)"
+      },
+      {
+        "command": "translateHelper.replaceWithTranslation",
+        "title": "用翻译结果替换",
+        "category": "翻译助手"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "translateHelper.translate",
+        "key": "alt+t",
+        "when": "editorHasSelection"
+      },
+      {
+        "command": "translateHelper.naming",
+        "key": "alt+n",
+        "when": "editorHasSelection"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "translateHelper.translate",
+          "group": "9_cutcopypaste@5",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "translateHelper.naming",
+          "group": "9_cutcopypaste@6",
+          "when": "editorHasSelection"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "翻译助手",
+      "properties": {
+        "translateHelper.azureOpenAIKey": {
+          "type": "string",
+          "default": "",
+          "description": "Azure OpenAI API Key"
+        },
+        "translateHelper.azureOpenAIEndpoint": {
+          "type": "string",
+          "default": "",
+          "description": "Azure OpenAI Endpoint (例如: https://your-resource.openai.azure.com/)"
+        },
+        "translateHelper.azureOpenAIDeploymentName": {
+          "type": "string",
+          "default": "gpt-5-mini",
+          "description": "Azure OpenAI 部署名称 (Deployment Name)"
+        },
+        "translateHelper.targetLanguage": {
+          "type": "string",
+          "default": "zh",
+          "enum": [
+            "zh",
+            "en",
+            "ja",
+            "ko",
+            "fr",
+            "de",
+            "es",
+            "ru"
+          ],
+          "description": "目标语言代码 (zh: 中文, en: 英文, ja: 日文, ko: 韩文, fr: 法文, de: 德文, es: 西班牙文, ru: 俄文)"
+        },
+        "translateHelper.namingCount": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 5,
+          "description": "变量命名建议数量"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.30",
+    "@types/vscode": "^1.108.1",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "openai": "^6.17.0"
+  }
+}
