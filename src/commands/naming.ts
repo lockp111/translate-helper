@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { AzureOpenAIService } from '../providers/openAIService';
+import { AzureOpenAIService } from '../providers/azureOpenAIService';
 import { ResultPanel } from '../ui/resultPanel';
 
 let openAIService: AzureOpenAIService | null = null;

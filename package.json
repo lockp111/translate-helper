@@ -1,7 +1,7 @@
 {
   "name": "translate-helper",
   "displayName": "Translate Helper",
-  "description": "智能翻译助手 - 基于 Azure OpenAI 大模型的划词翻译和变量命名建议",
+  "description": "智能翻译助手 - 基于大模型的划词翻译和变量命名建议",
   "version": "1.0.0",
   "publisher": "lockp111",
   "engines": {
@@ -63,6 +63,11 @@
     "configuration": {
       "title": "翻译助手",
       "properties": {
+        "translateHelper.enableQuickActions": {
+          "type": "boolean",
+          "default": true,
+          "description": "在编辑器选中文本时显示快速操作菜单"
+        },
         "translateHelper.azureOpenAIKey": {
           "type": "string",
           "default": "",
