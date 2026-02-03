@@ -2,7 +2,7 @@
   "name": "translate-helper",
   "displayName": "Translate Helper",
   "description": "智能翻译助手 - 基于大模型的划词翻译和变量命名建议",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "publisher": "lockp111",
   "repository": {
     "type": "git",
