@@ -2,7 +2,7 @@
   "name": "translate-helper",
   "displayName": "Translate Helper",
   "description": "智能翻译助手 - 基于大模型的划词翻译和变量命名建议",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "publisher": "lockp111",
   "repository": {
     "type": "git",
@@ -72,20 +72,28 @@
           "default": true,
           "description": "在编辑器选中文本时显示快速操作菜单"
         },
-        "translateHelper.azureOpenAIKey": {
+        "translateHelper.provider": {
           "type": "string",
-          "default": "",
-          "description": "Azure OpenAI API Key"
-        },
-        "translateHelper.azureOpenAIEndpoint": {
-          "type": "string",
-          "default": "",
-          "description": "Azure OpenAI Endpoint (例如: https://your-resource.openai.azure.com/)"
-        },
-        "translateHelper.azureOpenAIDeploymentName": {
-          "type": "string",
-          "default": "gpt-5-mini",
-          "description": "Azure OpenAI 部署名称 (Deployment Name)"
+          "default": "openai",
+          "enum": [
+            "openai",
+            "claude",
+            "zhipu",
+            "deepseek",
+            "siliconflow",
+            "gemini",
+            "kimi"
+          ],
+          "enumDescriptions": [
+            "OpenAI",
+            "Claude (Anthropic)",
+            "智谱 GLM",
+            "DeepSeek",
+            "硅基流动",
+            "Google Gemini",
+            "Kimi (月之暗面)"
+          ],
+          "description": "选择 AI 服务提供商"
         },
         "translateHelper.targetLanguage": {
           "type": "string",
@@ -108,6 +116,86 @@
           "minimum": 1,
           "maximum": 5,
           "description": "变量命名建议数量"
+        },
+        "translateHelper.openaiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API Key"
+        },
+        "translateHelper.openaiBaseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API Base URL (可选，用于代理或自定义端点)"
+        },
+        "translateHelper.openaiModel": {
+          "type": "string",
+          "default": "gpt-5-mini",
+          "description": "OpenAI 模型名称"
+        },
+        "translateHelper.claudeApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Claude (Anthropic) API Key"
+        },
+        "translateHelper.claudeModel": {
+          "type": "string",
+          "default": "claude-haiku-4-5-20251001",
+          "description": "Claude 模型名称"
+        },
+        "translateHelper.claudeBaseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Claude API Base URL (可选，用于代理或自定义端点)"
+        },
+        "translateHelper.zhipuApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "智谱 API Key"
+        },
+        "translateHelper.zhipuModel": {
+          "type": "string",
+          "default": "glm-4.7-flash",
+          "description": "智谱 GLM 模型名称"
+        },
+        "translateHelper.deepseekApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "DeepSeek API Key"
+        },
+        "translateHelper.deepseekModel": {
+          "type": "string",
+          "default": "deepseek-v3.2",
+          "description": "DeepSeek 模型名称"
+        },
+        "translateHelper.siliconflowApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "硅基流动 API Key"
+        },
+        "translateHelper.siliconflowModel": {
+          "type": "string",
+          "default": "Qwen/Qwen3-8B",
+          "description": "硅基流动模型名称 (例如: Qwen/Qwen2.5-7B-Instruct, deepseek-ai/DeepSeek-V3)"
+        },
+        "translateHelper.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Google Gemini API Key"
+        },
+        "translateHelper.geminiModel": {
+          "type": "string",
+          "default": "gemini-3-flash-preview",
+          "description": "Gemini 模型名称"
+        },
+        "translateHelper.kimiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Kimi (月之暗面) API Key"
+        },
+        "translateHelper.kimiModel": {
+          "type": "string",
+          "default": "kimi-k2-turbo-preview",
+          "description": "Kimi 模型名称"
         }
       }
     }
@@ -123,6 +211,8 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.72.1",
+    "@google/genai": "^1.39.0",
     "openai": "^6.17.0"
   }
 }

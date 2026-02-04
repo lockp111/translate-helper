@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
-import { AzureOpenAIService } from '../providers/azureOpenAIService';
-import { ResultPanel } from '../ui/resultPanel';
-
-let openAIService: AzureOpenAIService | null = null;
+import { getProvider, getProviderName, getProviderSettingsKey } from '../providers/providerFactory';
+import { showNamingDialog } from '../ui/quickDialog';
+import { ILLMProvider } from '../providers/types';
 
 export async function namingCommand() {
     const editor = vscode.window.activeTextEditor;
@@ -22,22 +21,21 @@ export async function namingCommand() {
     const fileName = editor.document.fileName;
     const extension = fileName.split('.').pop()?.toLowerCase() || '';
 
-    // 初始化或复用服务实例
-    if (!openAIService) {
-        openAIService = new AzureOpenAIService();
-    }
+    // 获取当前配置的 Provider
+    const provider: ILLMProvider = getProvider();
+    const providerName = getProviderName();
 
-    if (!openAIService.isConfigured()) {
+    if (!provider.isConfigured()) {
         const action = await vscode.window.showErrorMessage(
-            '请先配置 Azure OpenAI API Key 和 Endpoint',
+            `请先配置 ${providerName} 的 API Key`,
             '打开设置',
             '取消'
         );
-        
+
         if (action === '打开设置') {
             vscode.commands.executeCommand(
                 'workbench.action.openSettings',
-                'translateHelper.azureOpenAIKey'
+                getProviderSettingsKey()
             );
         }
         return;
@@ -46,7 +44,7 @@ export async function namingCommand() {
     // 显示进度
     await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
-        title: '正在使用 AI 生成命名建议...',
+        title: `正在使用 ${providerName} 生成命名建议...`,
         cancellable: true
     }, async (progress, token) => {
         // 监听取消
@@ -55,10 +53,11 @@ export async function namingCommand() {
         });
 
         try {
-            const suggestions = await openAIService!.generateNamingSuggestions(text, extension);
-            
+            const suggestions = await provider.generateNamingSuggestions(text, extension);
+
             if (suggestions && suggestions.length > 0) {
-                ResultPanel.showNamingResult(text, suggestions);
+                // 使用弹窗显示命名建议
+                await showNamingDialog(text, suggestions);
             } else {
                 vscode.window.showWarningMessage('无法生成命名建议');
             }

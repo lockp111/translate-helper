@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { AzureOpenAIService } from '../providers/azureOpenAIService';
-import { ResultPanel } from '../ui/resultPanel';
+import { getProvider, getProviderName, getProviderSettingsKey } from '../providers/providerFactory';
+import { showTranslationDialog } from '../ui/quickDialog';
+import { ILLMProvider } from '../providers/types';
 
-let openAIService: AzureOpenAIService | null = null;
 let lastTranslationResult: string = '';
 
 export async function translateCommand() {
@@ -20,46 +20,76 @@ export async function translateCommand() {
         return;
     }
 
-    // 初始化或复用服务实例
-    if (!openAIService) {
-        openAIService = new AzureOpenAIService();
-    }
+    // 获取当前配置的 Provider
+    const provider: ILLMProvider = getProvider();
+    const providerName = getProviderName();
 
-    if (!openAIService.isConfigured()) {
+    if (!provider.isConfigured()) {
         const action = await vscode.window.showErrorMessage(
-            '请先配置 Azure OpenAI API Key 和 Endpoint',
+            `请先配置 ${providerName} 的 API Key`,
             '打开设置',
             '取消'
         );
-        
+
         if (action === '打开设置') {
             vscode.commands.executeCommand(
                 'workbench.action.openSettings',
-                'translateHelper.azureOpenAIKey'
+                getProviderSettingsKey()
             );
         }
         return;
     }
 
-    // 显示流式结果面板（右侧半屏）
-    ResultPanel.showStreaming(text, 'translation');
+    // 使用进度通知显示翻译过程
+    let translationResult = '';
 
-    try {
-        await openAIService.translateStream(text, {
-            onChunk: (chunk) => {
-                ResultPanel.appendChunk(chunk);
-            },
-            onComplete: () => {
-                lastTranslationResult = ResultPanel.currentResult || '';
-                ResultPanel.completeStream();
-            },
-            onError: (error) => {
-                vscode.window.showErrorMessage(`翻译出错: ${error.message}`);
-            }
+    await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: `正在使用 ${providerName} 翻译...`,
+        cancellable: true
+    }, async (progress, token) => {
+        return new Promise<void>((resolve, reject) => {
+            let cancelled = false;
+
+            token.onCancellationRequested(() => {
+                cancelled = true;
+                vscode.window.showInformationMessage('已取消翻译');
+                resolve();
+            });
+
+            provider.translateStream(text, {
+                onChunk: (chunk) => {
+                    if (cancelled) return;
+                    translationResult += chunk;
+                    // 显示翻译进度预览
+                    const preview = translationResult.length > 60
+                        ? translationResult.substring(0, 60) + '...'
+                        : translationResult;
+                    progress.report({ message: preview });
+                },
+                onComplete: () => {
+                    if (cancelled) return;
+                    lastTranslationResult = translationResult;
+                    resolve();
+                },
+                onError: (error) => {
+                    if (cancelled) return;
+                    vscode.window.showErrorMessage(`翻译出错: ${error.message}`);
+                    resolve();
+                }
+            }).catch((error) => {
+                if (!cancelled) {
+                    const errorMessage = error instanceof Error ? error.message : '未知错误';
+                    vscode.window.showErrorMessage(`翻译出错: ${errorMessage}`);
+                }
+                resolve();
+            });
         });
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : '未知错误';
-        vscode.window.showErrorMessage(`翻译出错: ${errorMessage}`);
+    });
+
+    // 翻译完成后显示结果弹窗
+    if (translationResult) {
+        await showTranslationDialog(text, translationResult);
     }
 }
 
