@@ -15,25 +15,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
-          cache: 'pnpm'
+          node-version: '20'
 
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       - name: Install vsce
-        run: pnpm add -g @vscode/vsce
+        run: npm install -g @vscode/vsce
 
       - name: Package Extension
         run: |
-          vsce package --no-dependencies
+          vsce package
           echo "VSIX_FILE=$(ls *.vsix)" >> $GITHUB_ENV
 
       - name: Upload to Release
