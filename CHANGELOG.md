@@ -2,6 +2,33 @@
 
 All notable changes to the "translate-helper" extension will be documented in this file.
 
+## [1.2.0] - 2026-02-04
+
+### Changed
+- 重构项目，迁移至使用 npm 和 tsc 进行包管理和编译
+- 移除 pnpm 和 esbuild 依赖，简化构建流程
+
+---
+
+## [1.0.3] - 2026-02-02
+
+### Added
+- 实现模块化 LLM 提供商系统，支持多种 AI 服务
+  - OpenAI
+  - Claude (Anthropic)
+  - 智谱 GLM
+  - DeepSeek
+  - 硅基流动
+  - Google Gemini
+  - Kimi (月之暗面)
+
+### Changed
+- 优化 API 调用，禁用流式传输和思考模式以提升响应速度
+- 重构服务配置检查逻辑
+- 重构命令模块以使用新的提供商系统
+
+---
+
 ## [1.0.0] - 2026-02-02
 
 ### Added
