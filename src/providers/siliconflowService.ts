@@ -58,20 +58,21 @@ export class SiliconFlowService implements ILLMProvider {
         const model = config.get<string>('siliconflowModel')!;
 
         try {
-            const stream = await this.client!.chat.completions.create({
+            // @ts-ignore - SiliconFlow/Qwen specific parameter to disable thinking mode
+            const response = await this.client!.chat.completions.create({
                 model: model,
                 messages: [
                     { role: 'system', content: getTranslationSystemPrompt() },
                     { role: 'user', content: getTranslationUserPrompt(text, targetLang) }
                 ],
-                stream: true
+                stream: false,
+                // @ts-ignore - SiliconFlow/Qwen specific: disable thinking mode for faster response
+                thinking: false
             });
 
-            for await (const chunk of stream) {
-                const content = chunk.choices[0]?.delta?.content || '';
-                if (content) {
-                    callbacks.onChunk(content);
-                }
+            const content = response.choices[0]?.message?.content || '';
+            if (content) {
+                callbacks.onChunk(content);
             }
 
             callbacks.onComplete();
@@ -93,13 +94,16 @@ export class SiliconFlowService implements ILLMProvider {
         const namingStyle = NAMING_STYLE_MAP[fileExtension] || 'camelCase (如: userList, getData)';
 
         try {
+            // @ts-ignore - SiliconFlow/Qwen specific parameter to disable thinking mode
             const response = await this.client!.chat.completions.create({
                 model: model,
                 messages: [
                     { role: 'system', content: getNamingSystemPrompt() },
                     { role: 'user', content: getNamingUserPrompt(text, count, namingStyle) }
                 ],
-                response_format: { type: 'json_object' }
+                response_format: { type: 'json_object' },
+                // @ts-ignore - SiliconFlow/Qwen specific: disable thinking mode for faster response
+                thinking: false
             });
 
             const content = response.choices[0]?.message?.content;
@@ -125,6 +129,8 @@ export class SiliconFlowService implements ILLMProvider {
     }
 
     isConfigured(): boolean {
-        return this.initializeClient();
+        const config = vscode.workspace.getConfiguration('translateHelper');
+        const apiKey = config.get<string>('siliconflowApiKey', '');
+        return !!apiKey;
     }
 }

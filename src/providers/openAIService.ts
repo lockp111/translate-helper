@@ -57,20 +57,18 @@ export class OpenAIService implements ILLMProvider {
         const model = config.get<string>('openaiModel')!;
 
         try {
-            const stream = await this.client!.chat.completions.create({
+            const response = await this.client!.chat.completions.create({
                 model: model,
                 messages: [
                     { role: 'system', content: getTranslationSystemPrompt() },
                     { role: 'user', content: getTranslationUserPrompt(text, targetLang) }
                 ],
-                stream: true
+                stream: false
             });
 
-            for await (const chunk of stream) {
-                const content = chunk.choices[0]?.delta?.content || '';
-                if (content) {
-                    callbacks.onChunk(content);
-                }
+            const content = response.choices[0]?.message?.content || '';
+            if (content) {
+                callbacks.onChunk(content);
             }
 
             callbacks.onComplete();
@@ -124,6 +122,8 @@ export class OpenAIService implements ILLMProvider {
     }
 
     isConfigured(): boolean {
-        return this.initializeClient();
+        const config = vscode.workspace.getConfiguration('translateHelper');
+        const apiKey = config.get<string>('openaiApiKey', '');
+        return !!apiKey;
     }
 }

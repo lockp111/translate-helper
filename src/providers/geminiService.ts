@@ -55,19 +55,19 @@ export class GeminiService implements ILLMProvider {
         const modelName = config.get<string>('geminiModel')!;
 
         try {
-            const response = await this.client!.models.generateContentStream({
+            const response = await this.client!.models.generateContent({
                 model: modelName,
                 contents: getTranslationUserPrompt(text, targetLang),
                 config: {
-                    systemInstruction: getTranslationSystemPrompt()
+                    systemInstruction: getTranslationSystemPrompt(),
+                    // Disable thinking mode for faster response (thinkingBudget: 0)
+                    thinkingConfig: { thinkingBudget: 0 }
                 }
             });
 
-            for await (const chunk of response) {
-                const chunkText = chunk.text;
-                if (chunkText) {
-                    callbacks.onChunk(chunkText);
-                }
+            const content = response.text;
+            if (content) {
+                callbacks.onChunk(content);
             }
 
             callbacks.onComplete();
@@ -94,7 +94,9 @@ export class GeminiService implements ILLMProvider {
                 contents: getNamingUserPrompt(text, count, namingStyle),
                 config: {
                     systemInstruction: getNamingSystemPrompt(),
-                    responseMimeType: 'application/json'
+                    responseMimeType: 'application/json',
+                    // Disable thinking mode for faster response (thinkingBudget: 0)
+                    thinkingConfig: { thinkingBudget: 0 }
                 }
             });
 
@@ -121,6 +123,8 @@ export class GeminiService implements ILLMProvider {
     }
 
     isConfigured(): boolean {
-        return this.initializeClient();
+        const config = vscode.workspace.getConfiguration('translateHelper');
+        const apiKey = config.get<string>('geminiApiKey', '');
+        return !!apiKey;
     }
 }

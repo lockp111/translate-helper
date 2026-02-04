@@ -57,19 +57,19 @@ export class ClaudeService implements ILLMProvider {
         const model = config.get<string>('claudeModel')!;
 
         try {
-            const stream = await this.client!.messages.stream({
+            const response = await this.client!.messages.create({
                 model: model,
                 max_tokens: 8192,
                 system: getTranslationSystemPrompt(),
                 messages: [
                     { role: 'user', content: getTranslationUserPrompt(text, targetLang) }
-                ]
+                ],
+                stream: false
             });
 
-            for await (const event of stream) {
-                if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-                    callbacks.onChunk(event.delta.text);
-                }
+            const content = response.content[0];
+            if (content.type === 'text' && content.text) {
+                callbacks.onChunk(content.text);
             }
 
             callbacks.onComplete();
@@ -123,6 +123,8 @@ export class ClaudeService implements ILLMProvider {
     }
 
     isConfigured(): boolean {
-        return this.initializeClient();
+        const config = vscode.workspace.getConfiguration('translateHelper');
+        const apiKey = config.get<string>('claudeApiKey', '');
+        return !!apiKey;
     }
 }
