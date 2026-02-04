@@ -33,7 +33,7 @@ jobs:
 
       - name: Package Extension
         run: |
-          vsce package
+          vsce package --no-dependencies
           echo "VSIX_FILE=$(ls *.vsix)" >> $GITHUB_ENV
 
       - name: Upload to Release
