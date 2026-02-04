@@ -207,12 +207,13 @@
   },
   "scripts": {
     "vscode:prepublish": "pnpm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "compile": "node esbuild.js --production",
+    "watch": "node esbuild.js --watch"
   },
   "devDependencies": {
     "@types/node": "^20.19.30",
     "@types/vscode": "^1.104.0",
+    "esbuild": "^0.27.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
